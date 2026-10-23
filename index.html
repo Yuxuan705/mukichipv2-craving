@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MUKICHIP V2: DAILY SOLVER - CRAVING</title>
+  <title>MUKICHIP V2: DAILY SOLVER - Craving</title>
 
   <!-- Google Fonts: Bagel Fat One & Handwritten Chinese fallbacks -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -970,23 +970,15 @@
       { cn: "海南鸡饭", en: "Chicken Rice" }
     ];
 
+    // Custom items: strictly resets to empty on every page refresh/reload
     let customItems = [];
     try {
-      const saved = localStorage.getItem("mukichip_custom_foods");
-      if (saved) {
-        customItems = JSON.parse(saved);
-      }
-    } catch (e) {
-      console.warn("Could not read custom items from localStorage", e);
-    }
-    // Initially empty for Custom category so users add their own items!
+      localStorage.removeItem("mukichip_custom_foods");
+      sessionStorage.removeItem("mukichip_custom_foods");
+    } catch (e) {}
 
     function saveCustomItems() {
-      try {
-        localStorage.setItem("mukichip_custom_foods", JSON.stringify(customItems));
-      } catch (e) {
-        console.warn("Could not save to localStorage", e);
-      }
+      // Kept in-memory only per visit; refreshes will always start clean and empty
     }
 
     /* =========================================================
