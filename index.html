@@ -1,1 +1,1417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>MUKICHIP V2: DAILY SOLVER - Craving</title>
+
+  <!-- Google Fonts: Bagel Fat One & Handwritten Chinese fallbacks -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Long+Cang&family=Ma+Shan+Zheng&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================================================
+       Font Definitions & Design Tokens
+       ========================================================= */
+    @font-face {
+      font-family: 'LiyuShoushu';
+      src: url('LiyuShoushu.ttf') format('truetype'),
+           url('Liyu Shoushu.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      --color-brown: #9B644F;
+      --color-bg: #FFFFFF;
+      --color-card-yellow: #FEE082;
+      --font-bagel: 'Bagel Fat One', cursive, system-ui, sans-serif;
+      --font-chinese: 'LiyuShoushu', 'Ma Shan Zheng', 'Long Cang', 'ZCOOL KuaiLe', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      --transition-smooth: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background-color: var(--color-bg);
+      color: var(--color-brown);
+      font-family: var(--font-bagel);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      overflow-x: hidden;
+      touch-action: manipulation;
+    }
+
+    /* Outer wrapper for mobile viewport centering */
+    .app-viewport {
+      width: 100%;
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 16px 20px 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    /* Screen View Container */
+    .view-screen {
+      width: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .view-screen.active {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* =========================================================
+       PAGE 1: HOME VIEW
+       ========================================================= */
+    .home-top-artwork {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .top-craving-img {
+      width: 82%;
+      max-width: 320px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+    }
+
+    /* Thick divider line with rounded caps directly connected */
+    .divider-line {
+      width: 90%;
+      max-width: 350px;
+      height: 4px;
+      background-color: var(--color-brown);
+      border-radius: 9999px;
+      margin: -2px auto 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Topic Header */
+    .topic-title {
+      font-family: var(--font-bagel);
+      font-size: clamp(17px, 4.8vw, 21px);
+      font-weight: 400;
+      color: var(--color-brown);
+      text-align: center;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-top: 16px;
+      margin-bottom: 16px;
+      user-select: none;
+    }
+
+    /* Buttons Container on Home */
+    .home-buttons-grid {
+      width: 92%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .btn-card {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      display: block;
+      width: 100%;
+      user-select: none;
+      -webkit-user-drag: none;
+      transition: transform 0.16s var(--transition-smooth), filter 0.16s ease;
+    }
+
+    .btn-card:active {
+      transform: scale(0.965);
+      filter: brightness(0.96);
+    }
+
+    .btn-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+      pointer-events: none;
+      filter: drop-shadow(0 4px 10px rgba(155, 100, 79, 0.08));
+    }
+
+    .home-sub-row {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .home-sub-row .btn-card {
+      flex: 1;
+    }
+
+    /* =========================================================
+       SUB-PAGES: BREAKFAST, MAINS, CUSTOM
+       ========================================================= */
+    .subpage-header {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 28px;
+      margin-bottom: 12px;
+    }
+
+    .subpage-icon-img {
+      width: 76px;
+      height: auto;
+      display: block;
+      margin-bottom: 8px;
+      user-select: none;
+      -webkit-user-drag: none;
+      animation: gentle-bob 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes gentle-bob {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-4px); }
+    }
+
+    .subpage-title-en {
+      font-family: var(--font-bagel);
+      font-size: clamp(20px, 5.5vw, 24px);
+      color: var(--color-brown);
+      letter-spacing: 0.8px;
+      line-height: 1.1;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .subpage-title-cn {
+      font-family: var(--font-chinese);
+      font-size: clamp(19px, 5.2vw, 22px);
+      color: var(--color-brown);
+      line-height: 1.2;
+      margin-top: 2px;
+      text-align: center;
+    }
+
+    /* =========================================================
+       FLOATING WORDS CLOUD
+       ========================================================= */
+    .floating-cloud-stage {
+      width: 100%;
+      height: 250px;
+      position: relative;
+      margin: 8px 0 16px;
+      overflow: hidden;
+      user-select: none;
+      pointer-events: auto;
+    }
+
+    .floating-tag {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      white-space: nowrap;
+      color: var(--color-brown);
+      opacity: 0.88;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      cursor: default;
+    }
+
+    .floating-tag:hover {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.15) !important;
+    }
+
+    .floating-tag .tag-cn {
+      font-family: var(--font-chinese);
+      font-size: 13px;
+      line-height: 1.1;
+      font-weight: 500;
+    }
+
+    .floating-tag .tag-en {
+      font-family: var(--font-bagel);
+      font-size: 11px;
+      line-height: 1.1;
+      letter-spacing: 0.2px;
+      opacity: 0.92;
+    }
+
+    /* Keyframe Floating Variations with Translate Center */
+    @keyframes driftA {
+      0% { transform: translate(-50%, -50%) translateY(0); }
+      50% { transform: translate(-50%, -50%) translateY(-4px); }
+      100% { transform: translate(-50%, -50%) translateY(3px); }
+    }
+
+    @keyframes driftB {
+      0% { transform: translate(-50%, -50%) translateY(0); }
+      50% { transform: translate(-50%, -50%) translateY(4px); }
+      100% { transform: translate(-50%, -50%) translateY(-3px); }
+    }
+
+    @keyframes driftC {
+      0% { transform: translate(-50%, -50%) translateY(0); }
+      50% { transform: translate(-50%, -50%) translateY(-3px); }
+      100% { transform: translate(-50%, -50%) translateY(4px); }
+    }
+
+    /* Custom Category Add Food & Management Bar */
+    .custom-control-bar {
+      width: 90%;
+      max-width: 350px;
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      justify-content: center;
+    }
+
+    .custom-pill-btn {
+      background: rgba(155, 100, 79, 0.08);
+      border: 1.5px dashed var(--color-brown);
+      color: var(--color-brown);
+      font-family: var(--font-chinese);
+      font-size: 14px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+
+    .custom-pill-btn:hover {
+      background: rgba(155, 100, 79, 0.16);
+      transform: translateY(-1px);
+    }
+
+    .custom-pill-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Modal for Adding Custom Foods */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #FFFFFF;
+      width: 100%;
+      max-width: 360px;
+      border-radius: 24px;
+      border: 3px solid var(--color-brown);
+      padding: 22px 20px 20px;
+      box-shadow: 0 16px 36px rgba(155, 100, 79, 0.25);
+      position: relative;
+      animation: popIn 0.25s var(--transition-smooth);
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-title {
+      font-family: var(--font-chinese);
+      font-size: 22px;
+      color: var(--color-brown);
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .modal-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid rgba(155, 100, 79, 0.35);
+      border-radius: 14px;
+      font-family: var(--font-chinese);
+      font-size: 15px;
+      color: var(--color-brown);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .modal-input:focus {
+      border-color: var(--color-brown);
+    }
+
+    .modal-btns {
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-btn-submit {
+      flex: 1;
+      background: var(--color-brown);
+      color: #FFF;
+      border: none;
+      padding: 10px;
+      border-radius: 12px;
+      font-family: var(--font-chinese);
+      font-size: 15px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .modal-btn-cancel {
+      flex: 1;
+      background: rgba(155, 100, 79, 0.1);
+      color: var(--color-brown);
+      border: none;
+      padding: 10px;
+      border-radius: 12px;
+      font-family: var(--font-chinese);
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .custom-tags-container {
+      max-height: 130px;
+      overflow-y: auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+      padding: 6px;
+      border: 1px dashed rgba(155, 100, 79, 0.3);
+      border-radius: 12px;
+    }
+
+    .custom-chip {
+      background: rgba(254, 224, 130, 0.4);
+      border: 1px solid rgba(155, 100, 79, 0.4);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-family: var(--font-chinese);
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .custom-chip-del {
+      cursor: pointer;
+      font-weight: bold;
+      color: #E2504C;
+    }
+
+    /* =========================================================
+       SCRATCH CARD COMPONENT
+       ========================================================= */
+    .scratchcard-wrapper {
+      width: 92%;
+      max-width: 360px;
+      position: relative;
+      margin-bottom: 14px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .scratchcard-frame-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      pointer-events: none;
+      filter: drop-shadow(0 6px 16px rgba(155, 100, 79, 0.12));
+    }
+
+    /* Overlay Scratchable Box
+       Calculated from PNG bounds:
+       left: 5.6%, width: 88.8%, top: 38.5%, height: 49.0%
+    */
+    .scratch-interactive-box {
+      position: absolute;
+      left: 5.6%;
+      width: 88.8%;
+      top: 38.5%;
+      height: 49.0%;
+      border-radius: 12px;
+      overflow: hidden;
+      background-color: var(--color-card-yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Secret Revealed Result Underneath */
+    .scratch-secret-result {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 12px;
+      text-align: center;
+      pointer-events: none;
+      background-color: var(--color-card-yellow);
+      border-radius: 12px;
+    }
+
+    .secret-food-en {
+      font-family: var(--font-bagel);
+      font-size: clamp(14px, 4.3vw, 19px);
+      color: var(--color-brown);
+      line-height: 1.15;
+      letter-spacing: 0.4px;
+      word-break: break-word;
+    }
+
+    .secret-food-cn {
+      font-family: var(--font-chinese);
+      font-size: clamp(15px, 4.6vw, 21px);
+      color: var(--color-brown);
+      line-height: 1.25;
+      margin-top: 3px;
+      word-break: break-word;
+    }
+
+    /* Scratch Canvas on Top */
+    .scratch-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      touch-action: none;
+      cursor: crosshair;
+      border-radius: 12px;
+      transition: opacity 0.35s ease;
+      z-index: 5;
+    }
+
+    .scratch-canvas.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Scratch Hint Animation */
+    .scratch-sparkle-hint {
+      position: absolute;
+      bottom: 6px;
+      right: 10px;
+      font-size: 11px;
+      color: rgba(155, 100, 79, 0.65);
+      font-family: var(--font-chinese);
+      pointer-events: none;
+      z-index: 6;
+      transition: opacity 0.3s;
+    }
+
+    /* =========================================================
+       SUBPAGE ACTION BUTTONS (Scratch Again & Change Category)
+       ========================================================= */
+    .subpage-action-row {
+      width: 92%;
+      max-width: 360px;
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .subpage-action-row .btn-card {
+      flex: 1;
+    }
+
+    /* =========================================================
+       BOTTOM IG STAMP
+       ========================================================= */
+    .ig-stamp-section {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 10px;
+      user-select: none;
+    }
+
+    .ig-stamp-link {
+      display: inline-block;
+      cursor: pointer;
+      transition: transform 0.2s var(--transition-smooth);
+    }
+
+    .ig-stamp-link:active {
+      transform: scale(0.92) rotate(-3deg);
+    }
+
+    .ig-stamp-img {
+      width: 109px;
+      height: 109px;
+      display: block;
+      pointer-events: none;
+      filter: drop-shadow(0 4px 8px rgba(155, 100, 79, 0.12));
+    }
+
+    /* Floating Confetti effect on full scratch */
+    .confetti-particle {
+      position: absolute;
+      pointer-events: none;
+      border-radius: 50%;
+      z-index: 99;
+      animation: confetti-fall 0.8s ease-out forwards;
+    }
+
+    @keyframes confetti-fall {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(50px) scale(0.3); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-viewport">
+
+    <!-- =======================================================
+         PAGE 1: MAIN HOME (FOOD SOLVER MENU)
+         ======================================================= -->
+    <div id="screen-home" class="view-screen active">
+      
+      <!-- Top Craving Artwork -->
+      <div class="home-top-artwork">
+        <img src="top-craving.png" alt="Mukichip Craving Character" class="top-craving-img">
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- Topic Title -->
+      <h1 class="topic-title">MUKICHIP V2: DAILY SOLVER</h1>
+
+      <!-- Buttons Grid -->
+      <div class="home-buttons-grid">
+        <!-- Breakfast Button (Full Width) -->
+        <button class="btn-card" id="btn-goto-breakfast" aria-label="Breakfast 早餐">
+          <img src="breakfast-button.png" alt="Breakfast 早餐">
+        </button>
+
+        <!-- Mains & Custom (2 Columns) -->
+        <div class="home-sub-row">
+          <button class="btn-card" id="btn-goto-mains" aria-label="Mains 正餐">
+            <img src="mains-button.png" alt="Mains 正餐">
+          </button>
+          <button class="btn-card" id="btn-goto-custom" aria-label="Custom 自定义">
+            <img src="custom-button.png" alt="Custom 自定义">
+          </button>
+        </div>
+      </div>
+
+      <!-- Instagram Stamp -->
+      <div class="ig-stamp-section">
+        <a href="https://www.instagram.com/yuxuantsuki" target="_blank" rel="noopener noreferrer" class="ig-stamp-link" title="Follow on Instagram @yuxuantsuki">
+          <img src="ig-stamp.png" alt="Instagram Stamp" class="ig-stamp-img">
+        </a>
+      </div>
+
+    </div>
+
+
+    <!-- =======================================================
+         PAGE 2: BREAKFAST
+         ======================================================= -->
+    <div id="screen-breakfast" class="view-screen">
+      
+      <div class="subpage-header">
+        <img src="breakfast-icon.png" alt="Breakfast Icon" class="subpage-icon-img">
+        <h2 class="subpage-title-en">BREAKFAST</h2>
+        <div class="subpage-title-cn">早餐</div>
+      </div>
+
+      <!-- Floating food words cloud -->
+      <div class="floating-cloud-stage" id="breakfast-cloud"></div>
+
+      <!-- Scratch Card Area -->
+      <div class="scratchcard-wrapper" id="breakfast-scratchcard-wrap">
+        <img src="breakfast-scratchcard.png" alt="Breakfast Scratch Card Frame" class="scratchcard-frame-img">
+        
+        <div class="scratch-interactive-box">
+          <div class="scratch-secret-result" id="breakfast-result">
+            <div class="secret-food-en" id="breakfast-result-en">KAYA TOAST & EGGS</div>
+            <div class="secret-food-cn" id="breakfast-result-cn">烤面包半生熟蛋</div>
+          </div>
+          <canvas class="scratch-canvas" id="canvas-breakfast"></canvas>
+          <div class="scratch-sparkle-hint" id="hint-breakfast">✎ 刮一刮</div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="subpage-action-row">
+        <button class="btn-card" id="btn-breakfast-scratchagain" aria-label="Scratch Again 再刮一次">
+          <img src="scratchagain-button.png" alt="Scratch Again 再刮一次">
+        </button>
+        <button class="btn-card" id="btn-breakfast-changecat" aria-label="Change Category 换个分类">
+          <img src="changecategory-button.png" alt="Change Category 换个分类">
+        </button>
+      </div>
+
+      <!-- Instagram Stamp -->
+      <div class="ig-stamp-section">
+        <a href="https://www.instagram.com/yuxuantsuki" target="_blank" rel="noopener noreferrer" class="ig-stamp-link" title="Follow on Instagram @yuxuantsuki">
+          <img src="ig-stamp.png" alt="Instagram Stamp" class="ig-stamp-img">
+        </a>
+      </div>
+
+    </div>
+
+
+    <!-- =======================================================
+         PAGE 3: MAINS
+         ======================================================= -->
+    <div id="screen-mains" class="view-screen">
+      
+      <div class="subpage-header">
+        <img src="mains-icon.png" alt="Mains Icon" class="subpage-icon-img">
+        <h2 class="subpage-title-en">MAINS</h2>
+        <div class="subpage-title-cn">正餐</div>
+      </div>
+
+      <!-- Floating food words cloud -->
+      <div class="floating-cloud-stage" id="mains-cloud"></div>
+
+      <!-- Scratch Card Area -->
+      <div class="scratchcard-wrapper" id="mains-scratchcard-wrap">
+        <img src="mains-scratchcard.png" alt="Mains Scratch Card Frame" class="scratchcard-frame-img">
+        
+        <div class="scratch-interactive-box">
+          <div class="scratch-secret-result" id="mains-result">
+            <div class="secret-food-en" id="mains-result-en">HAINAN CHICKEN RICE</div>
+            <div class="secret-food-cn" id="mains-result-cn">海南鸡饭</div>
+          </div>
+          <canvas class="scratch-canvas" id="canvas-mains"></canvas>
+          <div class="scratch-sparkle-hint" id="hint-mains">✎ 刮一刮</div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="subpage-action-row">
+        <button class="btn-card" id="btn-mains-scratchagain" aria-label="Scratch Again 再刮一次">
+          <img src="scratchagain-button.png" alt="Scratch Again 再刮一次">
+        </button>
+        <button class="btn-card" id="btn-mains-changecat" aria-label="Change Category 换个分类">
+          <img src="changecategory-button.png" alt="Change Category 换个分类">
+        </button>
+      </div>
+
+      <!-- Instagram Stamp -->
+      <div class="ig-stamp-section">
+        <a href="https://www.instagram.com/yuxuantsuki" target="_blank" rel="noopener noreferrer" class="ig-stamp-link" title="Follow on Instagram @yuxuantsuki">
+          <img src="ig-stamp.png" alt="Instagram Stamp" class="ig-stamp-img">
+        </a>
+      </div>
+
+    </div>
+
+
+    <!-- =======================================================
+         PAGE 4: CUSTOM
+         ======================================================= -->
+    <div id="screen-custom" class="view-screen">
+      
+      <div class="subpage-header">
+        <img src="custom-icon.png" alt="Custom Icon" class="subpage-icon-img">
+        <h2 class="subpage-title-en">CUSTOM</h2>
+        <div class="subpage-title-cn">自定义</div>
+      </div>
+
+      <!-- Custom control buttons: Add Food & Manage list -->
+      <div class="custom-control-bar">
+        <button class="custom-pill-btn" id="btn-open-custom-modal">
+          <span>＋ 添加想吃的美食</span>
+        </button>
+        <button class="custom-pill-btn" id="btn-open-manage-modal">
+          <span>✎ 管理清单</span>
+        </button>
+      </div>
+
+      <!-- Floating food words cloud -->
+      <div class="floating-cloud-stage" id="custom-cloud"></div>
+
+      <!-- Scratch Card Area -->
+      <div class="scratchcard-wrapper" id="custom-scratchcard-wrap">
+        <img src="custom-scratchcard.png" alt="Custom Scratch Card Frame" class="scratchcard-frame-img">
+        
+        <div class="scratch-interactive-box">
+          <div class="scratch-secret-result" id="custom-result">
+            <div class="secret-food-en" id="custom-result-en">SPICY HOTPOT</div>
+            <div class="secret-food-cn" id="custom-result-cn">麻辣火锅</div>
+          </div>
+          <canvas class="scratch-canvas" id="canvas-custom"></canvas>
+          <div class="scratch-sparkle-hint" id="hint-custom">✎ 刮一刮</div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="subpage-action-row">
+        <button class="btn-card" id="btn-custom-scratchagain" aria-label="Scratch Again 再刮一次">
+          <img src="scratchagain-button.png" alt="Scratch Again 再刮一次">
+        </button>
+        <button class="btn-card" id="btn-custom-changecat" aria-label="Change Category 换个分类">
+          <img src="changecategory-button.png" alt="Change Category 换个分类">
+        </button>
+      </div>
+
+      <!-- Instagram Stamp -->
+      <div class="ig-stamp-section">
+        <a href="https://www.instagram.com/yuxuantsuki" target="_blank" rel="noopener noreferrer" class="ig-stamp-link" title="Follow on Instagram @yuxuantsuki">
+          <img src="ig-stamp.png" alt="Instagram Stamp" class="ig-stamp-img">
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       CUSTOM FOOD MODAL
+       ======================================================= -->
+  <div class="modal-backdrop" id="custom-add-modal">
+    <div class="modal-card">
+      <div class="modal-title">添加自定义美食</div>
+      <div class="modal-input-group">
+        <input type="text" id="input-custom-cn" class="modal-input" placeholder="中文食物名 (例如: 炸鸡)" maxlength="20">
+        <input type="text" id="input-custom-en" class="modal-input" placeholder="英文名称 (例如: Fried Chicken)" maxlength="30">
+      </div>
+      <div class="modal-btns">
+        <button class="modal-btn-cancel" id="btn-close-custom-modal">取消</button>
+        <button class="modal-btn-submit" id="btn-save-custom-food">加入菜单</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANAGE CUSTOM FOODS MODAL -->
+  <div class="modal-backdrop" id="custom-manage-modal">
+    <div class="modal-card">
+      <div class="modal-title">已添加的美食菜单</div>
+      <div class="custom-tags-container" id="manage-chips-list"></div>
+      <div class="modal-btns">
+        <button class="modal-btn-cancel" id="btn-reset-custom-defaults">恢复默认</button>
+        <button class="modal-btn-submit" id="btn-close-manage-modal">完成</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =======================================================
+       APPLICATION JAVASCRIPT LOGIC
+       ======================================================= -->
+  <script>
+    /* =========================================================
+       1. Food Datasets
+       ========================================================= */
+    const BREAKFAST_ITEMS = [
+      { cn: "椰浆饭", en: "Nasi Lemak" },
+      { cn: "印度煎饼", en: "Roti Canai" },
+      { cn: "烤面包半生熟蛋", en: "Kaya Toast & Eggs" },
+      { cn: "猪肠粉", en: "Chee Cheong Fun" },
+      { cn: "哥罗面", en: "Kolo Mee" },
+      { cn: "猪肉粉", en: "Pork Noodles" },
+      { cn: "港式点心", en: "Dim Sum" },
+      { cn: "咖喱面", en: "Curry Mee" },
+      { cn: "云吞面", en: "Wantan Mee" },
+      { cn: "清汤米粉", en: "Bee Hoon Soup" },
+      { cn: "炒萝卜糕", en: "Fried Radish Cake" },
+      { cn: "糯米鸡", en: "Lo Mai Kai" },
+      { cn: "经济炒粉", en: "Economy Noodles" },
+      { cn: "印度咸糕", en: "Thosai" },
+      { cn: "葱抓饼", en: "Scallion Pancake" },
+      { cn: "砂锅伊面", en: "Claypot Yee Mee" },
+      { cn: "板面", en: "Pan Mee" },
+      { cn: "烧包", en: "Siew Pao" },
+      { cn: "砂拉越叻沙", en: "Sarawak Laksa" },
+      { cn: "美式早餐", en: "American Breakfast" },
+      { cn: "班尼迪克蛋", en: "Eggs Benedict" },
+      { cn: "牛油果吐司", en: "Avocado Toast" },
+      { cn: "牛角面包", en: "Croissant" },
+      { cn: "贝果", en: "Bagel" },
+      { cn: "麦片碗", en: "Granola Bowl" },
+      { cn: "早餐卷", en: "Breakfast Wrap" },
+      { cn: "美式煎饼", en: "Pancakes" },
+      { cn: "日式烤鱼定食", en: "Japanese Salmon Set" },
+      { cn: "鸡蛋三明治", en: "Egg Mayo Sando" },
+      { cn: "紫菜包饭", en: "Gimbap" },
+      { cn: "泡菜煎饼", en: "Kimchi Pancake" },
+      { cn: "越南法包", en: "Banh Mi" },
+      { cn: "泰式猪肉粥", en: "Thai Pork Congee" },
+      { cn: "日式饭团", en: "Onigiri" },
+      { cn: "肉包", en: "Steamed Pau" },
+      { cn: "豆浆油条", en: "Soy Milk & Yutiao" },
+      { cn: "燕麦粥", en: "Oatmeal" },
+      { cn: "芝士火腿三明治", en: "Ham & Cheese Sandwich" },
+      { cn: "花生酱吐司", en: "Peanut Butter Toast" },
+      { cn: "华夫饼", en: "Waffle" }
+    ];
+
+    const MAINS_ITEMS = [
+      { cn: "肉骨茶", en: "Bak Kut Teh" },
+      { cn: "海南鸡饭", en: "Hainan Chicken Rice" },
+      { cn: "炒葵条", en: "Char Kway Teow" },
+      { cn: "仁当鸡饭", en: "Nasi Rendang" },
+      { cn: "蓝花饭", en: "Nasi Kerabu" },
+      { cn: "蕉叶饭", en: "Banana Leaf Rice" },
+      { cn: "亚参叻沙", en: "Asam Laksa" },
+      { cn: "福建面", en: "KL Hokkien Mee" },
+      { cn: "瓦煲鸡饭", en: "Claypot Chicken Rice" },
+      { cn: "杂饭", en: "Economy Mixed Rice" },
+      { cn: "臭豆炒虾", en: "Sambal Petai Rice" },
+      { cn: "Mamak 炒面", en: "Mee Goreng Mamak" },
+      { cn: "黄油香料饭", en: "Briyani Rice" },
+      { cn: "猪肚鸡汤", en: "Pepper Pork Soup" },
+      { cn: "葡萄牙烧鱼", en: "Portuguese Fish" },
+      { cn: "鱼头米粉", en: "Fish Head Noodles" },
+      { cn: "牛肉粉", en: "Beef Noodles" },
+      { cn: "海鲜煮炒", en: "Seafood Zi Char" },
+      { cn: "韩式炸鸡", en: "Korean Fried Chicken" },
+      { cn: "石锅拌饭", en: "Bibimbap" },
+      { cn: "炒年糕", en: "Tteokbokki" },
+      { cn: "泡菜汤", en: "Kimchi Jjigae" },
+      { cn: "韩式烤肉饭", en: "Korean BBQ Rice" },
+      { cn: "炸酱面", en: "Jajangmyeon" },
+      { cn: "纯豆腐锅", en: "Sundubu Jjigae" },
+      { cn: "日式拉面", en: "Japanese Ramen" },
+      { cn: "日式咖喱猪排饭", en: "Japanese Curry Rice" },
+      { cn: "照烧鸡肉饭", en: "Teriyaki Don" },
+      { cn: "刺身定食", en: "Sashimi Bento" },
+      { cn: "乌冬面", en: "Udon" },
+      { cn: "炸猪排饭", en: "Katsudon" },
+      { cn: "汉堡套餐", en: "Burger Set" },
+      { cn: "炸鸡套餐", en: "Fried Chicken Set" },
+      { cn: "培根意面", en: "Carbonara" },
+      { cn: "牛排", en: "Steak" },
+      { cn: "焗饭", en: "Baked Rice" },
+      { cn: "冬荫功汤", en: "Tom Yum Soup" },
+      { cn: "打抛猪肉饭", en: "Thai Basil Pork" },
+      { cn: "卤肉饭", en: "Lu Rou Fan" },
+      { cn: "麻辣烫", en: "Malatang" }
+    ];
+
+    const DEFAULT_CUSTOM_ITEMS = [
+      { cn: "麻辣火锅", en: "Spicy Hotpot" },
+      { cn: "珍珠奶茶", en: "Boba Milk Tea" },
+      { cn: "炭烤和牛", en: "Charcoal Wagyu BBQ" },
+      { cn: "韩式炸鸡", en: "Korean Crispy Chicken" },
+      { cn: "三文鱼刺身", en: "Salmon Sashimi" },
+      { cn: "意式披萨", en: "Italian Pizza" },
+      { cn: "日式豚骨拉面", en: "Tonkotsu Ramen" },
+      { cn: "芒果糯米饭", en: "Mango Sticky Rice" },
+      { cn: "干炒牛河", en: "Beef Chow Fun" },
+      { cn: "海南鸡饭", en: "Chicken Rice" }
+    ];
+
+    let customItems = [];
+    try {
+      const saved = localStorage.getItem("mukichip_custom_foods");
+      if (saved) {
+        customItems = JSON.parse(saved);
+      }
+    } catch (e) {
+      console.warn("Could not read custom items from localStorage", e);
+    }
+    // Initially empty for Custom category so users add their own items!
+
+    function saveCustomItems() {
+      try {
+        localStorage.setItem("mukichip_custom_foods", JSON.stringify(customItems));
+      } catch (e) {
+        console.warn("Could not save to localStorage", e);
+      }
+    }
+
+    /* =========================================================
+       2. Navigation Controller (SPA Views)
+       ========================================================= */
+    const screens = {
+      home: document.getElementById("screen-home"),
+      breakfast: document.getElementById("screen-breakfast"),
+      mains: document.getElementById("screen-mains"),
+      custom: document.getElementById("screen-custom")
+    };
+
+    let currentScreen = "home";
+
+    function showScreen(screenId) {
+      if (!screens[screenId]) screenId = "home";
+      currentScreen = screenId;
+
+      Object.keys(screens).forEach(id => {
+        if (id === screenId) {
+          screens[id].classList.add("active");
+        } else {
+          screens[id].classList.remove("active");
+        }
+      });
+
+      // Update URL Hash without reload
+      if (window.location.hash !== "#" + screenId) {
+        window.history.replaceState(null, "", "#" + screenId);
+      }
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      // Init or reset scratchcard for the screen
+      if (screenId === "breakfast") {
+        initScreen("breakfast", BREAKFAST_ITEMS);
+      } else if (screenId === "mains") {
+        initScreen("mains", MAINS_ITEMS);
+      } else if (screenId === "custom") {
+        initScreen("custom", customItems);
+      }
+    }
+
+    // Hash change handler
+    window.addEventListener("hashchange", () => {
+      const hash = window.location.hash.replace("#", "");
+      if (screens[hash]) {
+        showScreen(hash);
+      } else {
+        showScreen("home");
+      }
+    });
+
+    // Home Button Click Handlers
+    document.getElementById("btn-goto-breakfast").addEventListener("click", () => showScreen("breakfast"));
+    document.getElementById("btn-goto-mains").addEventListener("click", () => showScreen("mains"));
+    document.getElementById("btn-goto-custom").addEventListener("click", () => showScreen("custom"));
+
+    // Return to Home Buttons
+    document.getElementById("btn-breakfast-changecat").addEventListener("click", () => showScreen("home"));
+    document.getElementById("btn-mains-changecat").addEventListener("click", () => showScreen("home"));
+    document.getElementById("btn-custom-changecat").addEventListener("click", () => showScreen("home"));
+
+
+    /* =========================================================
+       3. Floating Words Cloud Generator (Non-Overlapping Grid)
+       ========================================================= */
+    function populateFloatingCloud(containerId, items) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = "";
+
+      // If empty (e.g. initial Custom screen before user adds food), keep clean
+      if (!items || items.length === 0) return;
+
+      // Pick up to 13 items for a spacious, non-overlapping floating cloud
+      const shuffled = [...items].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, Math.min(13, items.length));
+
+      // 13 collision-free, staggered coordinate slots in the 250px high stage
+      const slots = [
+        { x: 20, y: 12 }, { x: 50, y: 12 }, { x: 80, y: 12 },
+        { x: 34, y: 32 }, { x: 66, y: 32 },
+        { x: 18, y: 52 }, { x: 50, y: 52 }, { x: 82, y: 52 },
+        { x: 32, y: 72 }, { x: 68, y: 72 },
+        { x: 20, y: 90 }, { x: 50, y: 90 }, { x: 80, y: 90 }
+      ];
+
+      const driftAnims = ['driftA', 'driftB', 'driftC'];
+
+      selected.forEach((item, idx) => {
+        const slot = slots[idx % slots.length];
+        const tag = document.createElement("div");
+        tag.className = "floating-tag";
+
+        const anim = driftAnims[idx % driftAnims.length];
+        const dur = (3.0 + (idx % 3) * 0.8).toFixed(2);
+        const delay = ((idx * 0.25) % 1.5).toFixed(2);
+
+        tag.style.left = slot.x + "%";
+        tag.style.top = slot.y + "%";
+        tag.style.animation = `${anim} ${dur}s ease-in-out ${delay}s infinite alternate`;
+
+        tag.innerHTML = `
+          <span class="tag-cn">${item.cn}</span>
+          <span class="tag-en">${item.en}</span>
+        `;
+
+        container.appendChild(tag);
+      });
+    }
+
+
+    /* =========================================================
+       4. Scratch Card Controller
+       ========================================================= */
+    const scratchStates = {
+      breakfast: { canvas: null, ctx: null, isDrawing: false, scratchedPct: 0, isRevealed: false },
+      mains: { canvas: null, ctx: null, isDrawing: false, scratchedPct: 0, isRevealed: false },
+      custom: { canvas: null, ctx: null, isDrawing: false, scratchedPct: 0, isRevealed: false }
+    };
+
+    function pickRandomFood(items) {
+      if (!items || items.length === 0) return { cn: "请先添加想吃的美食哦", en: "Add Your Food First" };
+      return items[Math.floor(Math.random() * items.length)];
+    }
+
+    function setupScratchCanvas(type, items) {
+      const state = scratchStates[type];
+      const canvas = document.getElementById(`canvas-${type}`);
+      const hint = document.getElementById(`hint-${type}`);
+      if (!canvas) return;
+
+      state.canvas = canvas;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      state.ctx = ctx;
+
+      // Select random food result
+      const food = pickRandomFood(items);
+      document.getElementById(`${type}-result-en`).textContent = food.en;
+      document.getElementById(`${type}-result-cn`).textContent = food.cn;
+
+      // Reset state
+      state.isRevealed = false;
+      state.scratchedPct = 0;
+      canvas.classList.remove("fade-out");
+      if (hint) hint.style.opacity = "1";
+
+      // Set canvas physical resolution matching rendered bounding box
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+
+      ctx.scale(dpr, dpr);
+
+      // Draw scratch card coating: exact yellow match #FEE082 with "Scratch Here"
+      drawScratchCover(ctx, rect.width, rect.height);
+
+      // Bind events once
+      if (!canvas._eventsAttached) {
+        canvas._eventsAttached = true;
+
+        const getPos = (e) => {
+          const r = canvas.getBoundingClientRect();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+          return {
+            x: clientX - r.left,
+            y: clientY - r.top
+          };
+        };
+
+        const scratchAt = (pos) => {
+          if (state.isRevealed) return;
+          ctx.globalCompositeOperation = "destination-out";
+          ctx.beginPath();
+          ctx.arc(pos.x, pos.y, 22, 0, Math.PI * 2, false);
+          ctx.fill();
+
+          if (hint) hint.style.opacity = "0";
+          checkScratchProgress(type);
+        };
+
+        const startDraw = (e) => {
+          if (state.isRevealed) return;
+          state.isDrawing = true;
+          scratchAt(getPos(e));
+        };
+
+        const moveDraw = (e) => {
+          if (!state.isDrawing || state.isRevealed) return;
+          e.preventDefault();
+          scratchAt(getPos(e));
+        };
+
+        const stopDraw = () => {
+          state.isDrawing = false;
+        };
+
+        // Pointer/Mouse
+        canvas.addEventListener("mousedown", startDraw);
+        window.addEventListener("mousemove", moveDraw);
+        window.addEventListener("mouseup", stopDraw);
+
+        // Touch (Mobile)
+        canvas.addEventListener("touchstart", startDraw, { passive: false });
+        window.addEventListener("touchmove", moveDraw, { passive: false });
+        window.addEventListener("touchend", stopDraw);
+        window.addEventListener("touchcancel", stopDraw);
+      }
+    }
+
+    function drawScratchCover(ctx, w, h) {
+      ctx.globalCompositeOperation = "source-over";
+      
+      // Base Solid Yellow Coating
+      ctx.fillStyle = "#FEE082";
+      ctx.fillRect(0, 0, w, h);
+
+      // Subtle Decorative Speckles for a tactile scratch card texture
+      ctx.fillStyle = "rgba(155, 100, 79, 0.05)";
+      for (let i = 0; i < 40; i++) {
+        const sx = Math.random() * w;
+        const sy = Math.random() * h;
+        const sr = Math.random() * 3 + 1;
+        ctx.beginPath();
+        ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // "Scratch Here" in Bagel Fat One Font
+      ctx.fillStyle = "#9B644F";
+      ctx.font = "bold 20px 'Bagel Fat One', cursive, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("Scratch Here", w / 2, h / 2);
+    }
+
+    let progressCheckTimer = null;
+    function checkScratchProgress(type) {
+      if (progressCheckTimer) return;
+      progressCheckTimer = setTimeout(() => {
+        progressCheckTimer = null;
+        const state = scratchStates[type];
+        if (!state.canvas || state.isRevealed) return;
+
+        const canvas = state.canvas;
+        const ctx = state.ctx;
+        const w = canvas.width;
+        const h = canvas.height;
+        if (w === 0 || h === 0) return;
+
+        // Sample pixels efficiently across grid
+        try {
+          const imgData = ctx.getImageData(0, 0, w, h);
+          const data = imgData.data;
+          let transparentCount = 0;
+          const totalSamples = 300;
+          const step = Math.floor(data.length / (totalSamples * 4));
+
+          for (let i = 3; i < data.length; i += step * 4) {
+            if (data[i] === 0) {
+              transparentCount++;
+            }
+          }
+
+          const pct = (transparentCount / totalSamples) * 100;
+          state.scratchedPct = pct;
+
+          // If scratched > 40%, auto-reveal with confetti pop
+          if (pct > 40 && !state.isRevealed) {
+            revealResult(type);
+          }
+        } catch (e) {
+          console.warn("Scratch progress check error:", e);
+        }
+      }, 100);
+    }
+
+    function revealResult(type) {
+      const state = scratchStates[type];
+      state.isRevealed = true;
+      if (state.canvas) {
+        state.canvas.classList.add("fade-out");
+      }
+      triggerConfetti(state.canvas);
+    }
+
+    function triggerConfetti(anchorElem) {
+      if (!anchorElem) return;
+      const rect = anchorElem.getBoundingClientRect();
+      const colors = ['#9B644F', '#FEE082', '#FCA125', '#FF7E67', '#88D49E'];
+      for (let i = 0; i < 24; i++) {
+        const dot = document.createElement("div");
+        dot.className = "confetti-particle";
+        const size = Math.random() * 8 + 6;
+        dot.style.width = size + "px";
+        dot.style.height = size + "px";
+        dot.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        dot.style.left = (rect.left + Math.random() * rect.width) + "px";
+        dot.style.top = (rect.top + rect.height * 0.3 + Math.random() * 20) + "px";
+        document.body.appendChild(dot);
+        setTimeout(() => dot.remove(), 800);
+      }
+    }
+
+    function initScreen(type, items) {
+      populateFloatingCloud(`${type}-cloud`, items);
+      // Wait for layout rendering to get correct canvas size
+      setTimeout(() => {
+        setupScratchCanvas(type, items);
+      }, 50);
+    }
+
+    // "Scratch Again" Button Click Handlers
+    document.getElementById("btn-breakfast-scratchagain").addEventListener("click", () => {
+      setupScratchCanvas("breakfast", BREAKFAST_ITEMS);
+    });
+
+    document.getElementById("btn-mains-scratchagain").addEventListener("click", () => {
+      setupScratchCanvas("mains", MAINS_ITEMS);
+    });
+
+    document.getElementById("btn-custom-scratchagain").addEventListener("click", () => {
+      setupScratchCanvas("custom", customItems);
+    });
+
+
+    /* =========================================================
+       5. Custom Category Management Modals
+       ========================================================= */
+    const addModal = document.getElementById("custom-add-modal");
+    const manageModal = document.getElementById("custom-manage-modal");
+    const inputCn = document.getElementById("input-custom-cn");
+    const inputEn = document.getElementById("input-custom-en");
+    const chipsList = document.getElementById("manage-chips-list");
+
+    document.getElementById("btn-open-custom-modal").addEventListener("click", () => {
+      inputCn.value = "";
+      inputEn.value = "";
+      addModal.classList.add("open");
+      inputCn.focus();
+    });
+
+    document.getElementById("btn-close-custom-modal").addEventListener("click", () => {
+      addModal.classList.remove("open");
+    });
+
+    document.getElementById("btn-save-custom-food").addEventListener("click", () => {
+      const cn = inputCn.value.trim();
+      const en = inputEn.value.trim() || cn;
+      if (!cn && !en) return;
+
+      customItems.unshift({ cn: cn || en, en: en || cn });
+      saveCustomItems();
+      addModal.classList.remove("open");
+
+      // Refresh Custom view
+      initScreen("custom", customItems);
+    });
+
+    document.getElementById("btn-open-manage-modal").addEventListener("click", () => {
+      renderManageChips();
+      manageModal.classList.add("open");
+    });
+
+    document.getElementById("btn-close-manage-modal").addEventListener("click", () => {
+      manageModal.classList.remove("open");
+      initScreen("custom", customItems);
+    });
+
+    document.getElementById("btn-reset-custom-defaults").addEventListener("click", () => {
+      if (confirm("确定要恢复默认美食清单吗？")) {
+        customItems = [...DEFAULT_CUSTOM_ITEMS];
+        saveCustomItems();
+        renderManageChips();
+        initScreen("custom", customItems);
+      }
+    });
+
+    function renderManageChips() {
+      chipsList.innerHTML = "";
+      customItems.forEach((item, index) => {
+        const chip = document.createElement("div");
+        chip.className = "custom-chip";
+        chip.innerHTML = `
+          <span>${item.cn} / ${item.en}</span>
+          <span class="custom-chip-del" data-index="${index}">✕</span>
+        `;
+        chipsList.appendChild(chip);
+      });
+
+      chipsList.querySelectorAll(".custom-chip-del").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const idx = parseInt(e.target.dataset.index, 10);
+          if (customItems.length <= 1) {
+            alert("请至少保留一个美食选项哦！");
+            return;
+          }
+          customItems.splice(idx, 1);
+          saveCustomItems();
+          renderManageChips();
+        });
+      });
+    }
+
+    // Modal background click close
+    [addModal, manageModal].forEach(m => {
+      m.addEventListener("click", (e) => {
+        if (e.target === m) m.classList.remove("open");
+      });
+    });
+
+
+    /* =========================================================
+       6. Initialization on Load & Window Resize
+       ========================================================= */
+    window.addEventListener("DOMContentLoaded", () => {
+      const hash = window.location.hash.replace("#", "");
+      if (screens[hash]) {
+        showScreen(hash);
+      } else {
+        showScreen("home");
+      }
+    });
+
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (currentScreen !== "home") {
+          const items = currentScreen === "breakfast" ? BREAKFAST_ITEMS :
+                        currentScreen === "mains" ? MAINS_ITEMS : customItems;
+          setupScratchCanvas(currentScreen, items);
+        }
+      }, 250);
+    });
+  </script>
+</body>
+</html>
 
