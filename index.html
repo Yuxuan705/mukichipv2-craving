@@ -270,6 +270,21 @@
       opacity: 0.92;
     }
 
+    /* Single food name tag in custom floating cloud */
+    .floating-tag .tag-single.tag-cn {
+      font-family: var(--font-chinese);
+      font-size: 15px;
+      line-height: 1.2;
+      font-weight: 500;
+    }
+
+    .floating-tag .tag-single.tag-en {
+      font-family: var(--font-bagel);
+      font-size: 13px;
+      line-height: 1.2;
+      letter-spacing: 0.3px;
+    }
+
     /* Keyframe Floating Variations with Translate Center */
     @keyframes driftA {
       0% { transform: translate(-50%, -50%) translateY(0); }
@@ -825,10 +840,9 @@
        ======================================================= -->
   <div class="modal-backdrop" id="custom-add-modal">
     <div class="modal-card">
-      <div class="modal-title">添加自定义美食</div>
+      <div class="modal-title">添加想吃的美食</div>
       <div class="modal-input-group">
-        <input type="text" id="input-custom-cn" class="modal-input" placeholder="中文食物名 (例如: 炸鸡)" maxlength="20">
-        <input type="text" id="input-custom-en" class="modal-input" placeholder="英文名称 (例如: Fried Chicken)" maxlength="30">
+        <input type="text" id="input-custom-food" class="modal-input" placeholder="输入美食名称 (例如: 炸鸡 或 Fried Chicken)" maxlength="30" autocomplete="off">
       </div>
       <div class="modal-btns">
         <button class="modal-btn-cancel" id="btn-close-custom-modal">取消</button>
@@ -843,7 +857,7 @@
       <div class="modal-title">已添加的美食菜单</div>
       <div class="custom-tags-container" id="manage-chips-list"></div>
       <div class="modal-btns">
-        <button class="modal-btn-cancel" id="btn-reset-custom-defaults">恢复默认</button>
+        <button class="modal-btn-cancel" id="btn-reset-custom-defaults">清空清单</button>
         <button class="modal-btn-submit" id="btn-close-manage-modal">完成</button>
       </div>
     </div>
@@ -1076,10 +1090,20 @@
         tag.style.top = slot.y + "%";
         tag.style.animation = `${anim} ${dur}s ease-in-out ${delay}s infinite alternate`;
 
-        tag.innerHTML = `
-          <span class="tag-cn">${item.cn}</span>
-          <span class="tag-en">${item.en}</span>
-        `;
+        // If it's a single custom food item (or has name property)
+        if (item.name) {
+          const isChinese = item.isChinese !== undefined ? item.isChinese : /[\u4e00-\u9fa5]/.test(item.name);
+          tag.innerHTML = `<span class="tag-single ${isChinese ? 'tag-cn' : 'tag-en'}">${item.name}</span>`;
+        } else if (item.cn && item.en) {
+          tag.innerHTML = `
+            <span class="tag-cn">${item.cn}</span>
+            <span class="tag-en">${item.en}</span>
+          `;
+        } else {
+          const text = item.cn || item.en || "";
+          const isChinese = /[\u4e00-\u9fa5]/.test(text);
+          tag.innerHTML = `<span class="tag-single ${isChinese ? 'tag-cn' : 'tag-en'}">${text}</span>`;
+        }
 
         container.appendChild(tag);
       });
@@ -1112,8 +1136,36 @@
 
       // Select random food result
       const food = pickRandomFood(items);
-      document.getElementById(`${type}-result-en`).textContent = food.en;
-      document.getElementById(`${type}-result-cn`).textContent = food.cn;
+      const enElem = document.getElementById(`${type}-result-en`);
+      const cnElem = document.getElementById(`${type}-result-cn`);
+
+      if (type === "custom") {
+        if (!items || items.length === 0) {
+          enElem.textContent = "Add Your Food First";
+          enElem.style.display = "block";
+          cnElem.textContent = "请先添加想吃的美食哦";
+          cnElem.style.display = "block";
+        } else {
+          const text = food.name || food.cn || food.en || "";
+          const isChinese = food.isChinese !== undefined ? food.isChinese : /[\u4e00-\u9fa5]/.test(text);
+          if (isChinese) {
+            cnElem.textContent = text;
+            cnElem.style.display = "block";
+            enElem.textContent = "";
+            enElem.style.display = "none";
+          } else {
+            enElem.textContent = text;
+            enElem.style.display = "block";
+            cnElem.textContent = "";
+            cnElem.style.display = "none";
+          }
+        }
+      } else {
+        enElem.textContent = food.en;
+        enElem.style.display = "block";
+        cnElem.textContent = food.cn;
+        cnElem.style.display = "block";
+      }
 
       // Reset state
       state.isRevealed = false;
@@ -1307,32 +1359,56 @@
        ========================================================= */
     const addModal = document.getElementById("custom-add-modal");
     const manageModal = document.getElementById("custom-manage-modal");
-    const inputCn = document.getElementById("input-custom-cn");
-    const inputEn = document.getElementById("input-custom-en");
+    const inputFood = document.getElementById("input-custom-food");
     const chipsList = document.getElementById("manage-chips-list");
 
+    // Dynamic input font detection: LiyuShoushu if Chinese, Bagel Fat One if English
+    inputFood.addEventListener("input", () => {
+      const val = inputFood.value;
+      if (/[\u4e00-\u9fa5]/.test(val)) {
+        inputFood.style.fontFamily = "var(--font-chinese)";
+      } else {
+        inputFood.style.fontFamily = "var(--font-bagel)";
+      }
+    });
+
     document.getElementById("btn-open-custom-modal").addEventListener("click", () => {
-      inputCn.value = "";
-      inputEn.value = "";
+      inputFood.value = "";
+      inputFood.style.fontFamily = "var(--font-chinese)";
       addModal.classList.add("open");
-      inputCn.focus();
+      setTimeout(() => inputFood.focus(), 50);
     });
 
     document.getElementById("btn-close-custom-modal").addEventListener("click", () => {
       addModal.classList.remove("open");
     });
 
-    document.getElementById("btn-save-custom-food").addEventListener("click", () => {
-      const cn = inputCn.value.trim();
-      const en = inputEn.value.trim() || cn;
-      if (!cn && !en) return;
+    function addCustomFoodItem() {
+      const text = inputFood.value.trim();
+      if (!text) return;
 
-      customItems.unshift({ cn: cn || en, en: en || cn });
+      const isChinese = /[\u4e00-\u9fa5]/.test(text);
+      customItems.unshift({
+        name: text,
+        isChinese: isChinese,
+        cn: isChinese ? text : "",
+        en: !isChinese ? text : ""
+      });
       saveCustomItems();
       addModal.classList.remove("open");
 
       // Refresh Custom view
       initScreen("custom", customItems);
+    }
+
+    document.getElementById("btn-save-custom-food").addEventListener("click", addCustomFoodItem);
+
+    // Support Enter key inside input to save directly
+    inputFood.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addCustomFoodItem();
+      }
     });
 
     document.getElementById("btn-open-manage-modal").addEventListener("click", () => {
@@ -1346,8 +1422,8 @@
     });
 
     document.getElementById("btn-reset-custom-defaults").addEventListener("click", () => {
-      if (confirm("确定要恢复默认美食清单吗？")) {
-        customItems = [...DEFAULT_CUSTOM_ITEMS];
+      if (confirm("确定要清空自定义美食清单吗？")) {
+        customItems = [];
         saveCustomItems();
         renderManageChips();
         initScreen("custom", customItems);
@@ -1356,11 +1432,18 @@
 
     function renderManageChips() {
       chipsList.innerHTML = "";
+      if (customItems.length === 0) {
+        chipsList.innerHTML = "<div style='color: rgba(155, 100, 79, 0.6); font-family: var(--font-chinese); font-size: 15px; text-align: center; width: 100%; padding: 14px 0;'>暂无美食选项，请点击添加哦！</div>";
+        return;
+      }
       customItems.forEach((item, index) => {
         const chip = document.createElement("div");
         chip.className = "custom-chip";
+        const text = item.name || item.cn || item.en;
+        const isChinese = item.isChinese !== undefined ? item.isChinese : /[\u4e00-\u9fa5]/.test(text);
+        const fontFam = isChinese ? "var(--font-chinese)" : "var(--font-bagel)";
         chip.innerHTML = `
-          <span>${item.cn} / ${item.en}</span>
+          <span style="font-family: ${fontFam}; font-size: 14px;">${text}</span>
           <span class="custom-chip-del" data-index="${index}">✕</span>
         `;
         chipsList.appendChild(chip);
@@ -1369,10 +1452,6 @@
       chipsList.querySelectorAll(".custom-chip-del").forEach(btn => {
         btn.addEventListener("click", (e) => {
           const idx = parseInt(e.target.dataset.index, 10);
-          if (customItems.length <= 1) {
-            alert("请至少保留一个美食选项哦！");
-            return;
-          }
           customItems.splice(idx, 1);
           saveCustomItems();
           renderManageChips();
